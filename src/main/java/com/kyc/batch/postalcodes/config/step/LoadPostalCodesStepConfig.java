@@ -1,8 +1,10 @@
 package com.kyc.batch.postalcodes.config.step;
 
+import com.kyc.batch.postalcodes.listeners.LoadPostalCodesStepListener;
 import com.kyc.batch.postalcodes.mappers.PostalCodeFieldSetMapper;
 import com.kyc.batch.postalcodes.model.PostalCodeRawRecord;
 import com.kyc.batch.postalcodes.model.PostalCodeWrapper;
+import com.kyc.batch.postalcodes.policy.PostalCodeSkipPolicy;
 import com.kyc.batch.postalcodes.processors.PostalCodeProcessor;
 import com.kyc.batch.postalcodes.writers.AdapterJpaItemWriter;
 import com.kyc.core.batch.BatchStepListener;
@@ -23,24 +25,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
 import javax.persistence.EntityManagerFactory;
-
 import java.util.Arrays;
 
 import static com.kyc.batch.postalcodes.constants.AppConstants.C_CP;
-import static com.kyc.batch.postalcodes.constants.AppConstants.D_TIPO_ASENTA;
-import static com.kyc.batch.postalcodes.constants.AppConstants.D_MNPIO;
 import static com.kyc.batch.postalcodes.constants.AppConstants.C_CVE_CIUDAD;
+import static com.kyc.batch.postalcodes.constants.AppConstants.C_ESTADO;
 import static com.kyc.batch.postalcodes.constants.AppConstants.C_MNPIO;
 import static com.kyc.batch.postalcodes.constants.AppConstants.C_OFICINA;
 import static com.kyc.batch.postalcodes.constants.AppConstants.C_TIPO_ASENTA;
 import static com.kyc.batch.postalcodes.constants.AppConstants.D_ASENTA;
+import static com.kyc.batch.postalcodes.constants.AppConstants.D_CIUDAD;
 import static com.kyc.batch.postalcodes.constants.AppConstants.D_CODIGO;
+import static com.kyc.batch.postalcodes.constants.AppConstants.D_CP;
+import static com.kyc.batch.postalcodes.constants.AppConstants.D_ESTADO;
+import static com.kyc.batch.postalcodes.constants.AppConstants.D_MNPIO;
+import static com.kyc.batch.postalcodes.constants.AppConstants.D_TIPO_ASENTA;
 import static com.kyc.batch.postalcodes.constants.AppConstants.D_ZONA;
 import static com.kyc.batch.postalcodes.constants.AppConstants.ID_ASENTA_CPCONS;
-import static com.kyc.batch.postalcodes.constants.AppConstants.D_ESTADO;
-import static com.kyc.batch.postalcodes.constants.AppConstants.D_CIUDAD;
-import static com.kyc.batch.postalcodes.constants.AppConstants.C_ESTADO;
-import static com.kyc.batch.postalcodes.constants.AppConstants.D_CP;
 import static com.kyc.batch.postalcodes.constants.AppConstants.LOADING_DATA_STEP;
 
 @Configuration
@@ -55,6 +56,12 @@ public class LoadPostalCodesStepConfig {
     @Value("${kyc.batch.postal-codes.path}")
     private String filePath;
 
+    @Value("${kyc.batch.postal-codes.skip-limit}")
+    private int skipLimit;
+
+    @Value("${kyc.batch.postal-codes.chunk}")
+    private int chunkSize;
+
     @Autowired
     private KycBatchExceptionHandler exceptionHandler;
 
@@ -66,10 +73,10 @@ public class LoadPostalCodesStepConfig {
         return stepBuilderFactory
                 .get(LOADING_DATA_STEP)
                 .listener(executiveBatchStepListener())
-                .<PostalCodeRawRecord, PostalCodeWrapper>chunk(10)
+                .listener(new LoadPostalCodesStepListener(skipLimit))
+                .<PostalCodeRawRecord, PostalCodeWrapper>chunk(chunkSize)
                 .faultTolerant()
-                .skipLimit(10)
-                .skip(Exception.class)
+                .skipPolicy(new PostalCodeSkipPolicy(skipLimit))
                 .reader(filePostalCodesItemReader())
                 .processor(postalCodeProcessor())
                 .writer(compositeLoadPostalCodesItemWriter())

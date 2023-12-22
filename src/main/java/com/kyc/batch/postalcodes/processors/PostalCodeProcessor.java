@@ -24,7 +24,6 @@ public class PostalCodeProcessor implements ItemProcessor<PostalCodeRawRecord, P
     @Override
     public PostalCodeWrapper process(PostalCodeRawRecord item) {
 
-        LOGGER.info("{}",item);
         Integer postalCode = NumberUtils.toInt(item.getPostalCode());
         PostalCodeWrapper wrapper = new PostalCodeWrapper();
         if(!postalCodes.contains(postalCode)){

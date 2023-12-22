@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: ${kyc.config.database.url}
+    username: ${kyc.config.database.username}
+    password: ${kyc.config.database.pass}
+    driverClassName: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+
+kyc:
+  batch:
+    postal-codes:
+      chunk: 1000
+      path: "/opt/kyc/batch/postal-codes/CPdescarga.txt"
+      skip-limit: 10
+
+logging:
+  file:
+    name: /opt/kyc/logs/${spring.application.name}.log
+    logback:
+      rollingpolicy:
+        file-name-pattern: /opt/kyc/logs/${spring.application.name}/%d{yyyy-MM-dd}.%i.log.gz
+        max-file-size: 50MB
+        max-history: 30
+  level:
+    root: INFO
+    com.kyc: INFO
+    org.springframework: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql: INFO
+    org.springframework.batch.item.data: INFO

@@ -16,7 +16,9 @@ spring:
 kyc:
   batch:
     postal-codes:
-      path: "/home/batch/postal-codes/CPdescarga1.txt"
+      chunk: 100
+      path: "/home/batch/postal-codes/CPdescarga.txt"
+      skip-limit: 10
 
 logging:
   level:

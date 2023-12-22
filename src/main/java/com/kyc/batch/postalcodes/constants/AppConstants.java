@@ -2,10 +2,6 @@ package com.kyc.batch.postalcodes.constants;
 
 import com.kyc.core.constants.BatchConstants;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public final class AppConstants {
 
     public static final String JOB_NAME = String.format(BatchConstants.KYC_BATCH_JOB_TEMPLATE,
@@ -14,6 +10,9 @@ public final class AppConstants {
             "POSTAL-CODES","LOADING-DATA");
     public static final String CLEAN_FILE_TASK = String.format(BatchConstants.KYC_BATCH_TASKLET_TEMPLATE,
             "POSTAL-CODES","CLEAN-FILE");
+
+    public static final String UPDATE_POSTAL_CODE_PARAM_TASK = String.format(BatchConstants.KYC_BATCH_TASKLET_TEMPLATE,
+            "POSTAL-CODES","UPDATE_POSTAL_CODE_PARAM");
 
     public static final String D_CODIGO = "d_codigo";
     public static final String D_ASENTA = "d_asenta";

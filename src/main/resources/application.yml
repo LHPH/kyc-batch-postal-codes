@@ -10,14 +10,6 @@ spring:
       initialize-schema: never
       table-prefix: KYC_BATCH_
 
-logging:
-  level:
-    root: INFO
-    com.kyc: INFO
-    org.springframework: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql: TRACE
-
 kyc-messages:
   catalog:
     messages:
