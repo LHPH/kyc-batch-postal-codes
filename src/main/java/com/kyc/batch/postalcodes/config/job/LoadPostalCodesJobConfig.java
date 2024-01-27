@@ -1,10 +1,12 @@
 package com.kyc.batch.postalcodes.config.job;
 
+import com.kyc.batch.postalcodes.constants.AppConstants;
 import com.kyc.core.batch.BatchJobExecutionListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

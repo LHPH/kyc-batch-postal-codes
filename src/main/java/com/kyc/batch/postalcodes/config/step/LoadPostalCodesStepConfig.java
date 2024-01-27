@@ -1,5 +1,6 @@
 package com.kyc.batch.postalcodes.config.step;
 
+import com.kyc.batch.postalcodes.constants.AppConstants;
 import com.kyc.batch.postalcodes.listeners.LoadPostalCodesStepListener;
 import com.kyc.batch.postalcodes.mappers.PostalCodeFieldSetMapper;
 import com.kyc.batch.postalcodes.model.PostalCodeRawRecord;
@@ -11,8 +12,11 @@ import com.kyc.core.batch.BatchStepListener;
 import com.kyc.core.exception.handlers.KycBatchExceptionHandler;
 import com.kyc.core.properties.KycMessages;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.listener.CompositeStepExecutionListener;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -72,8 +76,7 @@ public class LoadPostalCodesStepConfig {
     public Step loadPostalCodesStep(){
         return stepBuilderFactory
                 .get(LOADING_DATA_STEP)
-                .listener(executiveBatchStepListener())
-                .listener(new LoadPostalCodesStepListener(skipLimit))
+                .listener(compositeStepExecutionListener())
                 .<PostalCodeRawRecord, PostalCodeWrapper>chunk(chunkSize)
                 .faultTolerant()
                 .skipPolicy(new PostalCodeSkipPolicy(skipLimit))
@@ -90,6 +93,7 @@ public class LoadPostalCodesStepConfig {
         return new FlatFileItemReaderBuilder<PostalCodeRawRecord>()
                 .name("loadPostalCodesStepItemReader")
                 .resource(new FileSystemResource(filePath))
+                .strict(false)
                 .delimited()
                 .delimiter("|")
                 .names(
@@ -127,7 +131,27 @@ public class LoadPostalCodesStepConfig {
     }
 
     @Bean
+    public CompositeStepExecutionListener compositeStepExecutionListener(){
+        CompositeStepExecutionListener listener = new CompositeStepExecutionListener();
+        listener.setListeners(new StepExecutionListener[]{
+                //For afterStep is the inverse order to apply
+                executiveBatchStepListener(),
+                promotionListener(),
+                new LoadPostalCodesStepListener(skipLimit),
+        });
+        return listener;
+    }
+
+    @Bean
     public BatchStepListener<PostalCodeRawRecord, PostalCodeWrapper> executiveBatchStepListener(){
         return new BatchStepListener<>(LOADING_DATA_STEP);
+    }
+
+    @Bean
+    public ExecutionContextPromotionListener promotionListener() {
+
+        ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+        listener.setKeys(new String[] {AppConstants.WRITTEN_ITEMS});
+        return listener;
     }
 }

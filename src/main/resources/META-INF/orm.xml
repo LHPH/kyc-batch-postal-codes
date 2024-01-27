@@ -7,7 +7,7 @@
 <!--native SQL query-->
     <named-native-query name="KycParameter.updatePostalCodeParameter">
         <query>
-            UPDATE KYC_PARAMETERS SET PARAM_VALUE=(SELECT MAX(VERSION) FROM KYC_POSTAL_CODES_CENTRAL),
+            UPDATE KYC_PARAMETERS SET PARAM_VALUE=(SELECT COALESCE(MAX(VERSION),0) FROM KYC_POSTAL_CODES_CENTRAL),
             UPDATED_DATE=CURRENT_DATE WHERE PARAM_KEY='KYC_POSTAL_CODE_VERSION'
         </query>
     </named-native-query>

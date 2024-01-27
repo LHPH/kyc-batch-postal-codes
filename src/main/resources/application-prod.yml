@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${kyc.config.database.url}
-    username: ${kyc.config.database.username}
-    password: ${kyc.config.database.pass}
+    url: ${kyc.config.database.postgresql.url}
+    username: ${kyc.config.database.postgresql.username}
+    password: ${kyc.config.database.postgresql.secret}
     driverClassName: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10

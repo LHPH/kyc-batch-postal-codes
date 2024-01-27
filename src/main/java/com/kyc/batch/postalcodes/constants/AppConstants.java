@@ -29,4 +29,6 @@ public final class AppConstants {
     public static final String ID_ASENTA_CPCONS = "id_asenta_cpcons";
     public static final String D_ZONA = "d_zona";
     public static final String C_CVE_CIUDAD = "c_cve_ciudad";
+
+    public static final String WRITTEN_ITEMS = "written-items";
 }
