@@ -13,7 +13,7 @@ public class PostalCodeSkipPolicy implements SkipPolicy {
     private int skipLimit;
 
     @Override
-    public boolean shouldSkip(Throwable throwable, int i) {
+    public boolean shouldSkip(Throwable throwable, long i) {
 
         LOGGER.warn("Skipping element {} due {}",i,throwable.getMessage());
         return i<=skipLimit;

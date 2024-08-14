@@ -11,12 +11,14 @@ import com.kyc.batch.postalcodes.writers.AdapterJpaItemWriter;
 import com.kyc.core.batch.BatchStepListener;
 import com.kyc.core.exception.handlers.KycBatchExceptionHandler;
 import com.kyc.core.properties.KycMessages;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.CompositeStepExecutionListener;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -27,8 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.Arrays;
 
 import static com.kyc.batch.postalcodes.constants.AppConstants.C_CP;
@@ -52,9 +54,6 @@ import static com.kyc.batch.postalcodes.constants.AppConstants.LOADING_DATA_STEP
 public class LoadPostalCodesStepConfig {
 
     @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
     private EntityManagerFactory emf;
 
     @Value("${kyc.batch.postal-codes.path}")
@@ -73,11 +72,10 @@ public class LoadPostalCodesStepConfig {
     private KycMessages kycMessages;
 
     @Bean
-    public Step loadPostalCodesStep(){
-        return stepBuilderFactory
-                .get(LOADING_DATA_STEP)
+    public Step loadPostalCodesStep(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
+        return new StepBuilder(LOADING_DATA_STEP,jobRepository)
                 .listener(compositeStepExecutionListener())
-                .<PostalCodeRawRecord, PostalCodeWrapper>chunk(chunkSize)
+                .<PostalCodeRawRecord, PostalCodeWrapper>chunk(chunkSize,platformTransactionManager)
                 .faultTolerant()
                 .skipPolicy(new PostalCodeSkipPolicy(skipLimit))
                 .reader(filePostalCodesItemReader())

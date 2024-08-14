@@ -1,6 +1,6 @@
 package com.kyc.batch.postalcodes.repositories;
 
-import com.kyc.batch.postalcodes.entity.KycParameter;
+import com.kyc.core.persistence.entity.KycParameter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

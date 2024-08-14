@@ -2,29 +2,28 @@ package com.kyc.batch.postalcodes.config.step;
 
 import com.kyc.core.batch.tasklets.CleanFilesTasklet;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static com.kyc.batch.postalcodes.constants.AppConstants.CLEAN_FILE_TASK;
 
 @Configuration
 public class CleanFileStepConfig {
 
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
     @Value("${kyc.batch.postal-codes.path}")
     private String filePath;
 
     @Bean
-    public Step cleanFileStep(){
+    public Step cleanFileStep(JobRepository jobRepository,
+                              PlatformTransactionManager transactionManager){
 
-        return stepBuilderFactory.get(CLEAN_FILE_TASK)
-                .tasklet(cleanFileTasklet())
+        return new StepBuilder(CLEAN_FILE_TASK,jobRepository)
+                .tasklet(cleanFileTasklet(),transactionManager)
                 .build();
     }
 

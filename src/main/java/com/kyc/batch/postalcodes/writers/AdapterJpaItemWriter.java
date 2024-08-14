@@ -1,10 +1,11 @@
 package com.kyc.batch.postalcodes.writers;
 
 import com.kyc.batch.postalcodes.model.PostalCodeWrapper;
+import jakarta.persistence.EntityManagerFactory;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaItemWriter;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -22,13 +23,14 @@ public class AdapterJpaItemWriter<T> implements ItemWriter<PostalCodeWrapper> {
     }
 
     @Override
-    public void write(List<? extends PostalCodeWrapper> items) throws Exception {
+    public void write(Chunk<? extends PostalCodeWrapper> chunk) throws Exception {
 
+        List<? extends PostalCodeWrapper> items = chunk.getItems();
         List<T> listMainData = items.stream()
                 .map(this.getter)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        jpaItemWriter.write(listMainData);
+        jpaItemWriter.write(new Chunk<>(listMainData));
     }
 }
