@@ -2,9 +2,9 @@ package com.kyc.batch.postalcodes.writers;
 
 import com.kyc.batch.postalcodes.model.PostalCodeWrapper;
 import jakarta.persistence.EntityManagerFactory;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.infrastructure.item.Chunk;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,8 +17,7 @@ public class AdapterJpaItemWriter<T> implements ItemWriter<PostalCodeWrapper> {
     private final Function<PostalCodeWrapper,T> getter;
 
     public AdapterJpaItemWriter(Function<PostalCodeWrapper,T> getter, EntityManagerFactory emf){
-        jpaItemWriter = new JpaItemWriter<>();
-        jpaItemWriter.setEntityManagerFactory(emf);
+        jpaItemWriter = new JpaItemWriter<>(emf);
         this.getter = getter;
     }
 

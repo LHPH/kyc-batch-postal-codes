@@ -1,11 +1,11 @@
 package com.kyc.batch.postalcodes.config.job;
 
 import com.kyc.core.batch.BatchJobExecutionListener;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.job.parameters.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,7 +17,7 @@ import static com.kyc.core.constants.BatchConstants.BATCH_PARTIAL_COMPLETED;
 public class LoadPostalCodesJobConfig {
 
     @Bean
-    public Job loadPostalCodesJob(JobRepository jobRepository,Step loadPostalCodesStep, Step cleanFileStep,
+    public Job loadPostalCodesJob(JobRepository jobRepository, Step loadPostalCodesStep, Step cleanFileStep,
                                   Step updatePostalCodeParameterStep){
         return new JobBuilder(JOB_NAME,jobRepository)
                 .incrementer(new RunIdIncrementer())

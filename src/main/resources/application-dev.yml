@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:6000/kyc_database
+    url: jdbc:postgresql://localhost:5432/kyc_database
     username: kyc_user
     password: kyc_pass
     driverClassName: org.postgresql.Driver
@@ -17,7 +17,7 @@ kyc:
   batch:
     postal-codes:
       chunk: 100
-      path: "/home/batch/postal-codes/CPdescarga.txt"
+      path: "/home/kyc/batch/postal-codes/CPdescarga.txt"
       skip-limit: 10
 
 logging:

@@ -12,18 +12,18 @@ import com.kyc.core.batch.BatchStepListener;
 import com.kyc.core.exception.handlers.KycBatchExceptionHandler;
 import com.kyc.core.properties.KycMessages;
 import jakarta.persistence.EntityManagerFactory;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.CompositeStepExecutionListener;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
-import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.file.FlatFileItemReader;
+import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.infrastructure.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -66,22 +66,21 @@ public class LoadPostalCodesStepConfig {
     private int chunkSize;
 
     @Autowired
-    private KycBatchExceptionHandler exceptionHandler;
-
-    @Autowired
     private KycMessages kycMessages;
 
     @Bean
-    public Step loadPostalCodesStep(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
+    public Step loadPostalCodesStep(JobRepository jobRepository,
+                                    PlatformTransactionManager platformTransactionManager,
+                                    KycMessages kycMessages){
         return new StepBuilder(LOADING_DATA_STEP,jobRepository)
-                .listener(compositeStepExecutionListener())
-                .<PostalCodeRawRecord, PostalCodeWrapper>chunk(chunkSize,platformTransactionManager)
+                .listener(compositeStepExecutionListener(kycMessages))
+                .<PostalCodeRawRecord, PostalCodeWrapper>chunk(chunkSize)
+                .transactionManager(platformTransactionManager)
                 .faultTolerant()
                 .skipPolicy(new PostalCodeSkipPolicy(skipLimit))
                 .reader(filePostalCodesItemReader())
                 .processor(postalCodeProcessor())
                 .writer(compositeLoadPostalCodesItemWriter())
-                .exceptionHandler(exceptionHandler)
                 .build();
     }
 
@@ -129,11 +128,11 @@ public class LoadPostalCodesStepConfig {
     }
 
     @Bean
-    public CompositeStepExecutionListener compositeStepExecutionListener(){
+    public CompositeStepExecutionListener compositeStepExecutionListener(KycMessages kycMessages){
         CompositeStepExecutionListener listener = new CompositeStepExecutionListener();
         listener.setListeners(new StepExecutionListener[]{
                 //For afterStep is the inverse order to apply
-                executiveBatchStepListener(),
+                executiveBatchStepListener(kycMessages),
                 promotionListener(),
                 new LoadPostalCodesStepListener(skipLimit),
         });
@@ -141,8 +140,8 @@ public class LoadPostalCodesStepConfig {
     }
 
     @Bean
-    public BatchStepListener<PostalCodeRawRecord, PostalCodeWrapper> executiveBatchStepListener(){
-        return new BatchStepListener<>(LOADING_DATA_STEP);
+    public BatchStepListener<PostalCodeRawRecord, PostalCodeWrapper> executiveBatchStepListener(KycMessages kycMessages){
+        return new BatchStepListener<>(LOADING_DATA_STEP,kycMessages.getMessage("001"));
     }
 
     @Bean
